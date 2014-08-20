@@ -20,13 +20,13 @@ namespace Thunderstruck
         /// <summary>
         /// Creates a new transactional data context to connection string named "Default".
         /// </summary>
-        public DataContext() : this(null, Transaction.Begin) { }
+        public DataContext() : this(DefaultConnectionStringName, Transaction.Begin) { }
 
         /// <summary>
         /// Creates a new data context to connection string named "Default". 
         /// </summary>
         /// <param name="transactionMode">Defines if data context is transactional.</param>
-        public DataContext(Transaction transactionMode) : this(null, transactionMode) { }
+        public DataContext(Transaction transactionMode) : this(DefaultConnectionStringName, transactionMode) { }
 
         /// <summary>
         /// Creates a new data context.
@@ -39,6 +39,21 @@ namespace Thunderstruck
 
             var connectionName = connectionStringName ?? DefaultConnectionStringName;
             ConnectionSettings = ConnectionStringBuffer.Instance.Get(connectionName);
+
+            var providerFactory = new ProviderFactory();
+            Provider = providerFactory.Create(ConnectionSettings, transaction);
+        }
+
+        /// <summary>
+        /// Creates a new data context.
+        /// </summary>
+        /// <param name="connectionStringSettings">Connection string setting of target database.</param>
+        /// <param name="transaction">Defines if data context is transactional.</param>
+        public DataContext(ConnectionStringSettings connectionStringSettings, Transaction transaction)
+        {
+            TransactionMode = transaction;
+
+            ConnectionSettings = connectionStringSettings;
 
             var providerFactory = new ProviderFactory();
             Provider = providerFactory.Create(ConnectionSettings, transaction);
